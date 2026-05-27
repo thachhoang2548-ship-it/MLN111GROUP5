@@ -12,7 +12,6 @@ import ClassStruggleGame from './components/ClassStruggleGame';
 import VisualInfographics from './components/VisualInfographics';
 import QuizSystem from './components/QuizSystem';
 import ModernReality from './components/ModernReality';
-import AITransparency from './components/AITransparency';
 import FinalImpact from './components/FinalImpact';
 import AIChatbot from './components/AIChatbot';
 
@@ -226,7 +225,6 @@ export default function App() {
                   )}
                   {activeSlide === 8 && (
                     <div className="flex flex-col gap-6 py-8">
-                      <AITransparency />
                       <FinalImpact />
                     </div>
                   )}
@@ -449,7 +447,6 @@ export default function App() {
                 )}
                 {activePage === 'conclusion' && (
                   <div className="flex flex-col gap-6 w-full">
-                    <AITransparency />
                     <FinalImpact />
                   </div>
                 )}
