@@ -155,7 +155,7 @@ export default function AIChatbot({ audioEnabled }) {
                 <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" title="Đang trực tuyến" />
               </div>
               <div className="text-[10px] text-gray-500 font-mono">
-                Sử dụng Gemini 1.5 Flash qua máy chủ Backend
+                Sử dụng Gemini 2.0 Flash qua máy chủ Backend
               </div>
             </div>
           </div>
