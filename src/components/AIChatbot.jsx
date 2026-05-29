@@ -31,9 +31,6 @@ export default function AIChatbot({ audioEnabled }) {
     }
   ]);
   const [input, setInput] = useState('');
-  const [apiKey, setApiKey] = useState(() => localStorage.getItem('AIzaSyC0HnXJU9eeJE7Mmw7iZt0GR2zRJWZQULc') || 'AIzaSyC0HnXJU9eeJE7Mmw7iZt0GR2zRJWZQULc');
-  const [showSettings, setShowSettings] = useState(false);
-  const [tempKey, setTempKey] = useState('');
   const [loading, setLoading] = useState(false);
 
   const messagesEndRef = useRef(null);
@@ -42,55 +39,29 @@ export default function AIChatbot({ audioEnabled }) {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, loading]);
 
-  const handleSaveKey = () => {
-    localStorage.setItem('gemini_api_key', tempKey);
-    setApiKey(tempKey);
-    setShowSettings(false);
-    if (audioEnabled) sound.playTrumpet();
-  };
-
-  const handleClearKey = () => {
-    localStorage.removeItem('gemini_api_key');
-    setApiKey('');
-    setTempKey('');
-    setShowSettings(false);
-    if (audioEnabled) sound.playClang();
-  };
-
   const callGemini = async (userPrompt) => {
     try {
-      const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            contents: [
-              {
-                parts: [
-                  {
-                    text: `Bạn là một Giáo sư/Học giả Triết học Mác-Lênin xuất sắc. Hãy trả lời câu hỏi sau về Giai cấp, Dân tộc và Đấu tranh giai cấp một cách khoa học, chuyên nghiệp bằng tiếng Việt, trích dẫn các quan điểm của K.Marx, F.Engels, V.I.Lenin và tư tưởng Hồ Chí Minh khi phù hợp. Hãy sử dụng định dạng Markdown sạch sẽ (in đậm, danh sách dòng). Trả lời súc tích, ngắn gọn để dễ trình bày trên lớp học. Câu hỏi: "${userPrompt}"`
-                  }
-                ]
-              }
-            ]
-          })
-        }
-      );
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          prompt: userPrompt
+        })
+      });
 
       const data = await response.json();
       if (data.error) {
-        return `❌ **Lỗi API Gemini:** ${data.error.message}\n\n*Đồng chí vui lòng nhấn nút ⚙️ (Cài đặt) ở góc trên bên phải để cập nhật hoặc xóa API Key cũ.*`;
+        return `❌ **Lỗi Backend:** ${data.error.message}`;
       }
-      if (data.candidates && data.candidates[0].content.parts[0].text) {
-        return data.candidates[0].content.parts[0].text;
+      if (data.text) {
+        return data.text;
       }
       throw new Error('API Response structure invalid');
     } catch (error) {
       console.error(error);
-      return '❌ **Lỗi kết nối:** Không thể kết nối với máy chủ AI. Vui lòng kiểm tra lại kết nối mạng của đồng chí.';
+      return '❌ **Lỗi kết nối:** Không thể kết nối với máy chủ Backend. Vui lòng kiểm tra lại kết nối mạng hoặc đảm bảo máy chủ đang hoạt động.';
     }
   };
 
@@ -116,13 +87,9 @@ export default function AIChatbot({ audioEnabled }) {
       // Simulate think delay
       await new Promise(resolve => setTimeout(resolve, 800));
       reply = preset.a;
-    } else if (apiKey) {
-      // Live API Call
-      reply = await callGemini(prompt);
     } else {
-      // No API key and not a preset
-      await new Promise(resolve => setTimeout(resolve, 600));
-      reply = 'Đồng chí chưa cấu hình **Gemini API Key** để gửi câu hỏi tự do. Vui lòng chọn một trong các câu hỏi gợi ý bên dưới, hoặc nhấn nút ⚙️ (Cài đặt) ở trên để dán API Key từ Google AI Studio.';
+      // Live API Call to Backend
+      reply = await callGemini(prompt);
     }
 
     setLoading(false);
@@ -185,25 +152,13 @@ export default function AIChatbot({ audioEnabled }) {
             <div>
               <div className="text-sm font-bold text-soviet-beige flex items-center gap-1.5">
                 Trợ lý Triết học AI
-                <span className={`w-2 h-2 rounded-full ${apiKey ? 'bg-green-500 animate-pulse' : 'bg-orange-500'}`} title={apiKey ? 'Online Mode (Gemini API)' : 'Offline/Local Preset Mode'} />
+                <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" title="Đang trực tuyến" />
               </div>
               <div className="text-[10px] text-gray-500 font-mono">
-                {apiKey ? 'Sử dụng Gemini 1.5 Flash' : 'Chế độ Cục bộ (Sẵn sàng 100%)'}
+                Sử dụng Gemini 1.5 Flash qua máy chủ Backend
               </div>
             </div>
           </div>
-
-          <button
-            onClick={() => {
-              setTempKey(apiKey);
-              setShowSettings(true);
-              if (audioEnabled) sound.playTick();
-            }}
-            className="p-2 rounded-lg bg-[#14141a] hover:bg-[#1b1b22] border border-soviet-border text-gray-400 hover:text-soviet-gold transition-colors cursor-pointer"
-            title="Cấu hình API Key"
-          >
-            <Key className="w-4 h-4" />
-          </button>
         </div>
 
         {/* Chat Messages */}
@@ -275,7 +230,7 @@ export default function AIChatbot({ audioEnabled }) {
             value={input}
             disabled={loading}
             onChange={(e) => setInput(e.target.value)}
-            placeholder={apiKey ? "Nhập câu hỏi thảo luận bất kỳ của đồng chí..." : "Nhập câu hỏi hoặc chọn câu hỏi gợi ý..."}
+            placeholder="Nhập câu hỏi thảo luận bất kỳ của đồng chí..."
             className="flex-grow bg-[#1b1b22] border border-soviet-border focus:border-soviet-red rounded-xl px-4 py-3 text-xs md:text-sm text-white placeholder-gray-500 focus:outline-none transition-colors"
           />
           <button
@@ -287,74 +242,7 @@ export default function AIChatbot({ audioEnabled }) {
           </button>
         </form>
 
-        {/* Settings API Key Modal */}
-        <AnimatePresence>
-          {showSettings && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="absolute inset-0 bg-[#0f0f12]/80 backdrop-blur-sm z-30 flex items-center justify-center p-4"
-            >
-              <motion.div
-                initial={{ scale: 0.95 }}
-                animate={{ scale: 1 }}
-                exit={{ scale: 0.95 }}
-                className="bg-[#1b1b22] border border-soviet-border rounded-2xl p-6 w-full max-w-md shadow-2xl relative"
-              >
-                <h3 className="text-base font-bold text-soviet-beige mb-2 flex items-center gap-2">
-                  <Key className="w-5 h-5 text-soviet-gold" />
-                  Cấu hình Gemini API Key
-                </h3>
-                <p className="text-xs text-gray-400 mb-4 leading-relaxed">
-                  Dán khóa API lấy từ <a href="https://aistudio.google.com/" target="_blank" rel="noreferrer" className="text-soviet-gold hover:underline">Google AI Studio</a> để mở khóa trả lời tự do mọi câu hỏi từ AI. Khóa này được lưu trực tiếp trên trình duyệt của bạn (localStorage).
-                </p>
 
-                <div className="space-y-4 mb-6">
-                  <input
-                    type="password"
-                    value={tempKey}
-                    onChange={(e) => setTempKey(e.target.value)}
-                    placeholder="AIzaSy..."
-                    className="w-full bg-[#14141a] border border-soviet-border focus:border-soviet-red rounded-xl px-4 py-3 text-xs text-white focus:outline-none transition-colors"
-                  />
-                  {apiKey && (
-                    <div className="flex items-center gap-2 text-[10px] text-green-500 bg-green-950/20 p-2.5 rounded-lg border border-green-500/20">
-                      <AlertCircle className="w-3.5 h-3.5" />
-                      Đã lưu API Key trực tiếp trên trình duyệt này.
-                    </div>
-                  )}
-                </div>
-
-                <div className="flex gap-3 justify-end text-xs font-semibold">
-                  <button
-                    onClick={() => {
-                      setShowSettings(false);
-                      if (audioEnabled) sound.playTick();
-                    }}
-                    className="px-4 py-2.5 bg-[#14141a] border border-soviet-border hover:bg-zinc-800 rounded-lg text-gray-400 cursor-pointer"
-                  >
-                    Hủy
-                  </button>
-                  {apiKey && (
-                    <button
-                      onClick={handleClearKey}
-                      className="px-4 py-2.5 bg-red-950/20 text-red-400 border border-red-500/30 hover:bg-red-950/40 rounded-lg flex items-center gap-1.5 cursor-pointer"
-                    >
-                      <Trash2 className="w-4 h-4" /> Xóa khóa
-                    </button>
-                  )}
-                  <button
-                    onClick={handleSaveKey}
-                    className="px-4 py-2.5 bg-gradient-to-r from-soviet-red to-red-700 text-white border border-soviet-gold/20 rounded-lg cursor-pointer"
-                  >
-                    Lưu khóa
-                  </button>
-                </div>
-              </motion.div>
-            </motion.div>
-          )}
-        </AnimatePresence>
 
       </div>
     </section>
