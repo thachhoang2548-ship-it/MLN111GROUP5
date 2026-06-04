@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { HelpCircle, Award, CheckCircle, XCircle, ChevronRight, RotateCcw } from 'lucide-react';
 import confetti from 'canvas-confetti';
@@ -7,6 +7,7 @@ import { sound } from './SoundManager';
 const quizQuestions = [
   {
     id: 1,
+    type: 'multiple-choice',
     topic: 'Định nghĩa Giai cấp',
     question: 'Theo định nghĩa kinh điển của V.I.Lênin, đặc trưng cơ bản nhất phân định các giai cấp khác nhau trong xã hội là gì?',
     options: [
@@ -20,6 +21,7 @@ const quizQuestions = [
   },
   {
     id: 2,
+    type: 'multiple-choice',
     topic: 'Nguồn gốc Giai cấp',
     question: 'Theo chủ nghĩa duy vật lịch sử, nguồn gốc trực tiếp và sâu xa nhất dẫn đến sự xuất hiện giai cấp là gì?',
     options: [
@@ -33,32 +35,38 @@ const quizQuestions = [
   },
   {
     id: 3,
+    type: 'true-false',
     topic: 'Đấu tranh Giai cấp',
-    question: 'Vì sao đấu tranh giai cấp được coi là động lực phát triển của các xã hội có giai cấp đối kháng?',
+    question: 'Khẳng định sau Đúng hay Sai: "Đấu tranh giai cấp chỉ là những xung đột tự phát mang tính bạo lực cơ học, không có vai trò gì đối với sự phát triển của lực lượng sản xuất và xã hội."',
     options: [
-      'Vì nó tiêu diệt lực lượng lao động dư thừa để cân bằng xã hội.',
-      'Vì nó giải quyết các mâu thuẫn giai cấp, lật đổ quan hệ sản xuất lỗi thời kìm hãm để thay thế bằng quan hệ sản xuất mới tiến bộ hơn.',
-      'Vì nó giúp giới chủ tập trung thêm nguồn vốn tư bản lớn.',
-      'Vì nó duy trì sự thống trị vĩnh viễn của các triều đại quý tộc.'
+      'Đúng (True)',
+      'Sai (False)'
     ],
-    answerIndex: 1,
-    explanation: 'Đấu tranh giai cấp đạt đỉnh điểm dẫn đến cách mạng xã hội, phá vỡ quan hệ sản xuất cũ lỗi thời, mở đường cho lực lượng sản xuất phát triển mạnh mẽ.'
+    answerIndex: 1, // Sai
+    explanation: 'Khẳng định trên là Sai. Đấu tranh giai cấp là động lực phát triển trực tiếp của xã hội có đối kháng giai cấp. Nó giải quyết mâu thuẫn xã hội, lật đổ quan hệ sản xuất lỗi thời để mở đường cho lực lượng sản xuất phát triển mạnh mẽ.'
   },
   {
     id: 4,
-    topic: 'Sự hình thành Dân tộc',
-    question: 'Sự hình thành dân tộc ở châu Âu gắn liền với thời kỳ nào và phương thức sản xuất nào?',
-    options: [
-      'Thời kỳ cổ đại - Phương thức sản xuất chiếm hữu nô lệ La Mã.',
-      'Thời kỳ cận đại - Phương thức sản xuất tư bản chủ nghĩa, xóa bỏ sự biệt lập cát cứ phong kiến.',
-      'Thời kỳ trung cổ - Phương thức sản xuất phong kiến nông nghiệp.',
-      'Thời kỳ hiện đại - Xu hướng toàn cầu hóa của thế kỷ 21.'
+    type: 'ordering',
+    topic: 'Sự tiến hóa của cộng đồng người',
+    question: 'Sắp xếp các hình thức cộng đồng người dưới đây theo tiến trình lịch sử từ sớm nhất đến muộn nhất (Sử dụng các nút mũi tên để di chuyển vị trí):',
+    items: [
+      'Bộ tộc (Chiefdom / Proto-nation)',
+      'Dân tộc (Nation)',
+      'Thị tộc (Clan)',
+      'Bộ lạc (Tribe)'
     ],
-    answerIndex: 1,
-    explanation: 'Chủ nghĩa tư bản phát triển thúc đẩy liên kết kinh tế, thống nhất thị trường, ngôn ngữ, văn hóa lãnh thổ, từ đó hình thành nên các quốc gia dân tộc cận đại.'
+    correctOrder: [
+      'Thị tộc (Clan)',
+      'Bộ lạc (Tribe)',
+      'Bộ tộc (Chiefdom / Proto-nation)',
+      'Dân tộc (Nation)'
+    ],
+    explanation: 'Các hình thức cộng đồng người tiến hóa theo trình tự lịch sử: Thị tộc (xã hội nguyên thủy) -> Bộ lạc (liên minh các thị tộc) -> Bộ tộc (khi xã hội có sự phân hóa giai cấp) -> Dân tộc (gắn liền với sự ra đời của chủ nghĩa tư bản).'
   },
   {
     id: 5,
+    type: 'multiple-choice',
     topic: 'Quan hệ Giai cấp và Dân tộc',
     question: 'Nhận định nào dưới đây đúng nhất về mối quan hệ biện chứng giữa giai cấp và dân tộc?',
     options: [
@@ -68,18 +76,26 @@ const quizQuestions = [
       'Đấu tranh giai cấp phá hoại tính thống trị vững bền của dân tộc.'
     ],
     answerIndex: 1,
-    explanation: 'Giai cấp thống trị đại diện cho quốc gia dân tộc ở đối ngoại, lợi ích của họ chi phối đường lối dân tộc. Giải phóng giai cấp vô sản là tiền đề xóa bỏ áp bức dân tộc giữa các quốc gia.'
+    explanation: 'Giai cấp thống trị nắm giữ tư liệu sản xuất chính sẽ chi phối quyền lực nhà nước, quy định hệ tư tưởng chính thống của dân tộc. Giải phóng giai cấp vô sản là điều kiện tiên quyết để xóa bỏ triệt để áp bức dân tộc.'
   }
 ];
 
 export default function QuizSystem({ audioEnabled }) {
   const [currentIdx, setCurrentIdx] = useState(0);
   const [selectedOpt, setSelectedOpt] = useState(null);
+  const [orderedList, setOrderedList] = useState([]);
   const [isAnswered, setIsAnswered] = useState(false);
   const [score, setScore] = useState(0);
   const [quizFinished, setQuizFinished] = useState(false);
 
   const activeQuestion = quizQuestions[currentIdx];
+
+  // Initialize ordering questions
+  useEffect(() => {
+    if (activeQuestion && activeQuestion.type === 'ordering') {
+      setOrderedList([...activeQuestion.items]);
+    }
+  }, [currentIdx]);
 
   const handleOptionSelect = (index) => {
     if (isAnswered) return;
@@ -87,11 +103,34 @@ export default function QuizSystem({ audioEnabled }) {
     setSelectedOpt(index);
   };
 
+  const moveItem = (index, direction) => {
+    if (isAnswered) return;
+    if (audioEnabled) sound.playTick();
+    const newList = [...orderedList];
+    if (direction === 'up' && index > 0) {
+      const temp = newList[index];
+      newList[index] = newList[index - 1];
+      newList[index - 1] = temp;
+    } else if (direction === 'down' && index < newList.length - 1) {
+      const temp = newList[index];
+      newList[index] = newList[index + 1];
+      newList[index + 1] = temp;
+    }
+    setOrderedList(newList);
+  };
+
   const handleCheckAnswer = () => {
-    if (selectedOpt === null || isAnswered) return;
+    if (isAnswered) return;
+    
+    let isCorrect = false;
+    if (activeQuestion.type === 'ordering') {
+      isCorrect = JSON.stringify(orderedList) === JSON.stringify(activeQuestion.correctOrder);
+    } else {
+      if (selectedOpt === null) return;
+      isCorrect = selectedOpt === activeQuestion.answerIndex;
+    }
     
     setIsAnswered(true);
-    const isCorrect = selectedOpt === activeQuestion.answerIndex;
     
     if (isCorrect) {
       if (audioEnabled) sound.playTrumpet();
@@ -182,40 +221,102 @@ export default function QuizSystem({ audioEnabled }) {
 
                 {/* Options list */}
                 <div className="space-y-3.5 mb-6">
-                  {activeQuestion.options.map((option, idx) => {
-                    const isSelected = selectedOpt === idx;
-                    const isCorrect = idx === activeQuestion.answerIndex;
-                    
-                    let cardStyle = 'bg-[#14141a] border-soviet-border text-gray-300 hover:border-soviet-gold/40';
-                    if (isSelected) cardStyle = 'bg-soviet-red/10 border-soviet-gold text-white';
-                    if (isAnswered) {
-                      if (isCorrect) cardStyle = 'bg-green-950/20 border-green-500 text-green-300';
-                      else if (isSelected) cardStyle = 'bg-red-950/20 border-red-500 text-red-300';
-                      else cardStyle = 'bg-[#14141a] border-soviet-border text-gray-500 opacity-60';
-                    }
+                  {activeQuestion.type === 'ordering' ? (
+                    // RENDERING ORDERING QUESTION
+                    orderedList.map((item, idx) => {
+                      const isCorrectOrder = isAnswered && orderedList[idx] === activeQuestion.correctOrder[idx];
+                      
+                      let cardStyle = 'bg-[#14141a] border-soviet-border text-gray-300';
+                      if (isAnswered) {
+                        cardStyle = isCorrectOrder 
+                          ? 'bg-green-950/20 border-green-500 text-green-300'
+                          : 'bg-red-950/20 border-red-500 text-red-300';
+                      }
 
-                    return (
-                      <button
-                        key={idx}
-                        disabled={isAnswered}
-                        onClick={() => handleOptionSelect(idx)}
-                        className={`w-full text-left p-4 rounded-xl border transition-all duration-300 flex items-start gap-3 text-sm ${cardStyle}`}
-                      >
-                        <span className={`w-5.5 h-5.5 rounded-full border flex-shrink-0 flex items-center justify-center font-bold text-[11px] ${
-                          isAnswered && isCorrect 
-                            ? 'bg-green-500 border-green-500 text-soviet-dark' 
-                            : isAnswered && isSelected
-                              ? 'bg-red-500 border-red-500 text-white'
-                              : isSelected
-                                ? 'bg-soviet-gold border-soviet-gold text-soviet-dark'
-                                : 'border-gray-500'
-                        }`}>
-                          {isAnswered && isCorrect ? '✓' : isAnswered && isSelected ? '✗' : String.fromCharCode(65 + idx)}
-                        </span>
-                        <span>{option}</span>
-                      </button>
-                    );
-                  })}
+                      return (
+                        <div
+                          key={idx}
+                          className={`p-4 rounded-xl border flex items-center justify-between gap-3 text-sm transition-all duration-300 ${cardStyle}`}
+                        >
+                          <div className="flex items-center gap-3">
+                            <span className={`w-5.5 h-5.5 rounded-full border flex-shrink-0 flex items-center justify-center font-bold text-[11px] ${
+                              isAnswered && isCorrectOrder
+                                ? 'bg-green-500 border-green-500 text-soviet-dark'
+                                : isAnswered
+                                  ? 'bg-red-500 border-red-500 text-white'
+                                  : 'border-soviet-gold text-soviet-gold bg-[#1b1b22]'
+                            }`}>
+                              {idx + 1}
+                            </span>
+                            <span>{item}</span>
+                          </div>
+
+                          {!isAnswered && (
+                            <div className="flex gap-1.5">
+                              <button
+                                type="button"
+                                onClick={() => moveItem(idx, 'up')}
+                                disabled={idx === 0}
+                                className={`px-2 py-1 text-xs rounded border border-soviet-border bg-[#1b1b22] text-gray-400 hover:text-soviet-gold transition-colors ${
+                                  idx === 0 ? 'opacity-35 cursor-not-allowed' : 'cursor-pointer'
+                                }`}
+                                title="Di chuyển lên"
+                              >
+                                ▲
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => moveItem(idx, 'down')}
+                                disabled={idx === orderedList.length - 1}
+                                className={`px-2 py-1 text-xs rounded border border-soviet-border bg-[#1b1b22] text-gray-400 hover:text-soviet-gold transition-colors ${
+                                  idx === orderedList.length - 1 ? 'opacity-35 cursor-not-allowed' : 'cursor-pointer'
+                                }`}
+                                title="Di chuyển xuống"
+                              >
+                                ▼
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })
+                  ) : (
+                    // RENDERING MULTIPLE CHOICE & TRUE/FALSE QUESTIONS
+                    activeQuestion.options.map((option, idx) => {
+                      const isSelected = selectedOpt === idx;
+                      const isCorrect = idx === activeQuestion.answerIndex;
+                      
+                      let cardStyle = 'bg-[#14141a] border-soviet-border text-gray-300 hover:border-soviet-gold/40';
+                      if (isSelected) cardStyle = 'bg-soviet-red/10 border-soviet-gold text-white';
+                      if (isAnswered) {
+                        if (isCorrect) cardStyle = 'bg-green-950/20 border-green-500 text-green-300';
+                        else if (isSelected) cardStyle = 'bg-red-950/20 border-red-500 text-red-300';
+                        else cardStyle = 'bg-[#14141a] border-soviet-border text-gray-500 opacity-60';
+                      }
+
+                      return (
+                        <button
+                          key={idx}
+                          disabled={isAnswered}
+                          onClick={() => handleOptionSelect(idx)}
+                          className={`w-full text-left p-4 rounded-xl border transition-all duration-300 flex items-start gap-3 text-sm ${cardStyle}`}
+                        >
+                          <span className={`w-5.5 h-5.5 rounded-full border flex-shrink-0 flex items-center justify-center font-bold text-[11px] ${
+                            isAnswered && isCorrect 
+                              ? 'bg-green-500 border-green-500 text-soviet-dark' 
+                              : isAnswered && isSelected
+                                ? 'bg-red-500 border-red-500 text-white'
+                                : isSelected
+                                  ? 'bg-soviet-gold border-soviet-gold text-soviet-dark'
+                                  : 'border-gray-500'
+                          }`}>
+                            {isAnswered && isCorrect ? '✓' : isAnswered && isSelected ? '✗' : String.fromCharCode(65 + idx)}
+                          </span>
+                          <span>{option}</span>
+                        </button>
+                      );
+                    })
+                  )}
                 </div>
               </div>
 
@@ -226,14 +327,10 @@ export default function QuizSystem({ audioEnabled }) {
                     <motion.div
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
-                      className={`p-4 rounded-xl text-xs leading-relaxed mb-6 border ${
-                        selectedOpt === activeQuestion.answerIndex
-                          ? 'bg-green-950/10 border-green-500/20 text-green-300'
-                          : 'bg-red-950/10 border-red-500/20 text-red-300'
-                      }`}
+                      className="p-4 rounded-xl text-xs leading-relaxed mb-6 border bg-[#14141a]/80 border-soviet-border text-gray-300"
                     >
-                      <strong className="block mb-1">
-                        {selectedOpt === activeQuestion.answerIndex ? '🎉 CHÍNH XÁC!' : '❌ CHƯA ĐÚNG!'} Phân tích lý thuyết:
+                      <strong className="block mb-1 text-soviet-gold">
+                        Phân tích lý luận:
                       </strong>
                       {activeQuestion.explanation}
                     </motion.div>
@@ -243,10 +340,10 @@ export default function QuizSystem({ audioEnabled }) {
                 <div className="flex justify-end">
                   {!isAnswered ? (
                     <button
-                      disabled={selectedOpt === null}
+                      disabled={activeQuestion.type !== 'ordering' && selectedOpt === null}
                       onClick={handleCheckAnswer}
                       className={`py-3 px-6 rounded-lg text-sm font-semibold transition-all ${
-                        selectedOpt === null
+                        activeQuestion.type !== 'ordering' && selectedOpt === null
                           ? 'bg-gray-700 text-gray-400 cursor-not-allowed border border-transparent'
                           : 'bg-gradient-to-r from-soviet-red to-red-700 hover:from-red-600 hover:to-red-800 text-white border border-soviet-gold/30 shadow-lg'
                       }`}
@@ -296,7 +393,7 @@ export default function QuizSystem({ audioEnabled }) {
 
               <button
                 onClick={resetQuiz}
-                className="flex items-center gap-2 bg-gradient-to-r from-soviet-red to-red-700 hover:from-red-600 hover:to-red-800 text-white font-semibold py-3 px-6 rounded-lg border border-soviet-gold/30 shadow-lg text-sm"
+                className="flex items-center gap-2 bg-gradient-to-r from-soviet-red to-red-700 hover:from-red-600 hover:to-red-800 text-white font-semibold py-3 px-6 rounded-lg border border-soviet-gold/30 shadow-lg text-sm cursor-pointer"
               >
                 <RotateCcw className="w-4 h-4" /> Làm lại bài trắc nghiệm
               </button>

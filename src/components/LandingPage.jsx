@@ -76,16 +76,34 @@ export default function LandingPage({ onStartSimulation, onEnterPresentation, au
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 1, delay: 1.1 }}
-          className="text-gray-400 max-w-2xl text-sm md:text-base leading-relaxed mb-10"
+          className="text-gray-400 max-w-2xl text-sm md:text-base leading-relaxed mb-8"
         >
           Trải nghiệm tương tác làm rõ lý luận duy vật lịch sử về Giai cấp và Dân tộc. Khám phá cách các hình thức cộng đồng người (Thị tộc, Bộ lạc, Bộ tộc, Dân tộc) hình thành và phát triển song hành cùng mâu thuẫn giai cấp qua các thời kỳ lịch sử.
         </motion.p>
+
+        {/* Presentation Video Player */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 1, delay: 1.2 }}
+          className="w-full max-w-2xl mb-8 overflow-hidden rounded-xl border border-soviet-border/50 bg-[#1b1b22]/50 p-2 shadow-2xl"
+        >
+          <video 
+            className="w-full h-auto rounded-lg shadow-inner"
+            controls
+            preload="metadata"
+          >
+            <source src="/videothuyettrinh.mp4" type="video/mp4" />
+            Trình duyệt của bạn không hỗ trợ phát video.
+          </video>
+          <p className="text-xs text-gray-400 mt-2 italic font-medium">Video Giới Thiệu / Thuyết Trình Chuyên Đề</p>
+        </motion.div>
 
         {/* Buttons / Actions */}
         <motion.div
           initial={{ scale: 0.9, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
-          transition={{ duration: 0.8, delay: 1.3 }}
+          transition={{ duration: 0.8, delay: 1.4 }}
           className="flex flex-col sm:flex-row gap-6 justify-center items-center"
         >
           <button

@@ -9,10 +9,9 @@ import LandingPage from './components/LandingPage';
 import InteractiveTimeline from './components/InteractiveTimeline';
 import ClassStruggleGame from './components/ClassStruggleGame';
 import VisualInfographics from './components/VisualInfographics';
-import QuizSystem from './components/QuizSystem';
 import ModernReality from './components/ModernReality';
 import FinalImpact from './components/FinalImpact';
-import AIChatbot from './components/AIChatbot';
+import AITransparency from './components/AITransparency';
 
 export default function App() {
   const [loading, setLoading] = useState(true);
@@ -60,7 +59,7 @@ export default function App() {
       if (e.key === 'ArrowRight' || e.key === ' ') {
         e.preventDefault();
         sound.playTick();
-        setActiveSlide((prev) => Math.min(prev + 1, 7));
+        setActiveSlide((prev) => Math.min(prev + 1, 6));
       } else if (e.key === 'ArrowLeft') {
         e.preventDefault();
         sound.playTick();
@@ -163,7 +162,7 @@ export default function App() {
               <div className="flex items-center gap-3">
                 <span className="w-3 h-3 rounded-full bg-soviet-red animate-pulse" />
                 <span className="font-serif font-bold text-soviet-beige text-sm md:text-base">
-                  Class Struggle Simulator — Slide {activeSlide + 1} / 8
+                  Class Struggle Simulator — Slide {activeSlide + 1} / 7
                 </span>
               </div>
               <button
@@ -205,24 +204,21 @@ export default function App() {
                     />
                   )}
                   {activeSlide === 2 && (
-                    <ClassStruggleGame audioEnabled={audioEnabled} />
+                    <VisualInfographics audioEnabled={audioEnabled} />
                   )}
                   {activeSlide === 3 && (
-                    <VisualInfographics />
-                  )}
-                  {activeSlide === 4 && (
-                    <QuizSystem audioEnabled={audioEnabled} />
-                  )}
-                  {activeSlide === 5 && (
-                    <AIChatbot audioEnabled={audioEnabled} />
-                  )}
-                  {activeSlide === 6 && (
                     <ModernReality />
                   )}
-                  {activeSlide === 7 && (
+                  {activeSlide === 4 && (
                     <div className="flex flex-col gap-6 py-8">
                       <FinalImpact />
                     </div>
+                  )}
+                  {activeSlide === 5 && (
+                    <ClassStruggleGame audioEnabled={audioEnabled} />
+                  )}
+                  {activeSlide === 6 && (
+                    <AITransparency audioEnabled={audioEnabled} />
                   )}
                 </motion.div>
               </AnimatePresence>
@@ -247,7 +243,7 @@ export default function App() {
 
               {/* Progress dots */}
               <div className="hidden md:flex gap-2">
-                {Array.from({ length: 8 }).map((_, idx) => (
+                {Array.from({ length: 7 }).map((_, idx) => (
                   <button
                     key={idx}
                     onClick={() => {
@@ -262,13 +258,13 @@ export default function App() {
               </div>
 
               <button
-                disabled={activeSlide === 7}
+                disabled={activeSlide === 6}
                 onClick={() => {
                   sound.playTick();
-                  setActiveSlide((prev) => Math.min(prev + 1, 7));
+                  setActiveSlide((prev) => Math.min(prev + 1, 6));
                 }}
                 className={`flex items-center gap-1.5 px-4 py-2.5 rounded-lg border text-sm font-semibold transition-all ${
-                  activeSlide === 7
+                  activeSlide === 6
                     ? 'opacity-30 border-transparent text-gray-600 cursor-not-allowed'
                     : 'bg-gradient-to-r from-soviet-red to-red-700 text-white border-soviet-gold/30'
                 }`}
@@ -309,28 +305,10 @@ export default function App() {
                   Tiến trình
                 </button>
                 <button
-                  onClick={() => selectPage('game')}
-                  className={`transition-colors cursor-pointer border-none bg-transparent ${activePage === 'game' ? 'text-soviet-gold font-bold' : 'text-gray-400 hover:text-soviet-beige'}`}
-                >
-                  Giả lập & Nhập vai
-                </button>
-                <button
                   onClick={() => selectPage('infographics')}
                   className={`transition-colors cursor-pointer border-none bg-transparent ${activePage === 'infographics' ? 'text-soviet-gold font-bold' : 'text-gray-400 hover:text-soviet-beige'}`}
                 >
                   Sơ đồ
-                </button>
-                <button
-                  onClick={() => selectPage('quiz')}
-                  className={`transition-colors cursor-pointer border-none bg-transparent ${activePage === 'quiz' ? 'text-soviet-gold font-bold' : 'text-gray-400 hover:text-soviet-beige'}`}
-                >
-                  Trắc nghiệm
-                </button>
-                <button
-                  onClick={() => selectPage('ai-chat')}
-                  className={`transition-colors cursor-pointer border-none bg-transparent ${activePage === 'ai-chat' ? 'text-soviet-gold font-bold' : 'text-gray-400 hover:text-soviet-beige'}`}
-                >
-                  Trợ lý AI
                 </button>
                 <button
                   onClick={() => selectPage('modern')}
@@ -343,6 +321,18 @@ export default function App() {
                   className={`transition-colors cursor-pointer border-none bg-transparent ${activePage === 'conclusion' ? 'text-soviet-gold font-bold' : 'text-gray-400 hover:text-soviet-beige'}`}
                 >
                   Kết luận
+                </button>
+                <button
+                  onClick={() => selectPage('game')}
+                  className={`transition-colors cursor-pointer border-none bg-transparent ${activePage === 'game' ? 'text-soviet-gold font-bold' : 'text-gray-400 hover:text-soviet-beige'}`}
+                >
+                  Giả lập & Nhập vai
+                </button>
+                <button
+                  onClick={() => selectPage('ai-transparency')}
+                  className={`transition-colors cursor-pointer border-none bg-transparent ${activePage === 'ai-transparency' ? 'text-soviet-gold font-bold' : 'text-gray-400 hover:text-soviet-beige'}`}
+                >
+                  Minh bạch AI
                 </button>
                 
                 <button
@@ -382,12 +372,11 @@ export default function App() {
               >
                 <button onClick={() => selectPage('home')} className={`py-1 ${activePage === 'home' ? 'text-soviet-gold' : 'text-gray-400'}`}>Trang chủ</button>
                 <button onClick={() => selectPage('timeline')} className={`py-1 ${activePage === 'timeline' ? 'text-soviet-gold' : 'text-gray-400'}`}>Tiến trình</button>
-                <button onClick={() => selectPage('game')} className={`py-1 ${activePage === 'game' ? 'text-soviet-gold' : 'text-gray-400'}`}>Giả lập & Nhập vai</button>
                 <button onClick={() => selectPage('infographics')} className={`py-1 ${activePage === 'infographics' ? 'text-soviet-gold' : 'text-gray-400'}`}>Sơ đồ</button>
-                <button onClick={() => selectPage('quiz')} className={`py-1 ${activePage === 'quiz' ? 'text-soviet-gold' : 'text-gray-400'}`}>Trắc nghiệm</button>
-                <button onClick={() => selectPage('ai-chat')} className={`py-1 ${activePage === 'ai-chat' ? 'text-soviet-gold' : 'text-gray-400'}`}>Trợ lý AI</button>
                 <button onClick={() => selectPage('modern')} className={`py-1 ${activePage === 'modern' ? 'text-soviet-gold' : 'text-gray-400'}`}>Thời đại số</button>
                 <button onClick={() => selectPage('conclusion')} className={`py-1 ${activePage === 'conclusion' ? 'text-soviet-gold' : 'text-gray-400'}`}>Kết luận</button>
+                <button onClick={() => selectPage('game')} className={`py-1 ${activePage === 'game' ? 'text-soviet-gold' : 'text-gray-400'}`}>Giả lập & Nhập vai</button>
+                <button onClick={() => selectPage('ai-transparency')} className={`py-1 ${activePage === 'ai-transparency' ? 'text-soviet-gold' : 'text-gray-400'}`}>Minh bạch AI</button>
               </motion.div>
             )}
           </header>
@@ -420,13 +409,10 @@ export default function App() {
                   <ClassStruggleGame audioEnabled={audioEnabled} />
                 )}
                 {activePage === 'infographics' && (
-                  <VisualInfographics />
+                  <VisualInfographics audioEnabled={audioEnabled} />
                 )}
-                {activePage === 'quiz' && (
-                  <QuizSystem audioEnabled={audioEnabled} />
-                )}
-                {activePage === 'ai-chat' && (
-                  <AIChatbot audioEnabled={audioEnabled} />
+                {activePage === 'ai-transparency' && (
+                  <AITransparency audioEnabled={audioEnabled} />
                 )}
                 {activePage === 'modern' && (
                   <ModernReality />
